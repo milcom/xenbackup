@@ -35,3 +35,10 @@ An example config is provided. Modify to your taste then run xenbackup with the 
      waiting for disks to cleanup
      Destroying Guest
 
+
+# Acknowledgements
+This program embedds a modified version of xenapi gem by Geoff Garside https://github.com/geoffgarside/xenapi
+
+# LICENSE
+see LICENSE 
+see lib/xenapi/LICENSE 
