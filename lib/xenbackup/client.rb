@@ -65,11 +65,21 @@ module XenBackup
       backup_refs
     end
 
-    # TODO: alot of these should handle str or array of ress
-    # This takes a tupe ref, name 
-    def move_vms(refs,sr_ref)
+    # move vms to sr(s)
+    def move_vms(refs, sr_ref)
+      # TODO: this should prob be lifted
+      if sr_ref.respond_to? :keys
+        sr_refs = sr_ref.keys
+      elsif sr_ref.kind_of? Array
+        sr_refs = sr_ref
+      else
+        sr_refs = [sr_ref]
+      end
+        
       refs.each do |tuple|
         ref, name = tuple
+        # get random ref
+        sr_ref = sr_refs.sample
         puts "Moving #{name} to Backup SR: #{sr_ref}"
         task =xapi.Async.VM.copy(ref, name, sr_ref)
         wait_on_task task
