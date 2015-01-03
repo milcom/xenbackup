@@ -196,7 +196,8 @@ module XenBackup
     # setup an xapi accessor
     def xapi
       @xapi ||= begin
-        session = XenApi::Client.new( XenBackup.configuration.uri )
+        verify = XenBackup.configuration.ssl_validate ? :verify_peer : :verify_none 
+        session = XenApi::Client.new( XenBackup.configuration.uri, 30, verify )
         session.login_with_password(
           XenBackup.configuration.user, 
           XenBackup.configuration.pass)

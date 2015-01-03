@@ -10,12 +10,14 @@ module XenBackup
   end
 
   class Configuration
-    attr_accessor :uri, :user, :pass, :backup, :tag
+    attr_accessor :uri, :user, :pass, :backup, :tag, :ssl_validate
 
     # could set defaults here
     def initialize
       @uri = 'http://localhost'
+      @user = 'root'
       @tag = 'xenbackup'
+      @ssl_validate = true
     end
   end
 end
