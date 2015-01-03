@@ -1,6 +1,5 @@
 require_relative 'config'
 require_relative '../xenapi/xenapi'
-
 module XenBackup
   class Client
     attr_reader :xapi
@@ -32,17 +31,17 @@ module XenBackup
     def backup
       XenBackup.configuration.backup.each_pair do |vm_tag, sr_tag|
         vms = filter_vm_tags([vm_tag])
-        sr_ref = find_sr_by_tag(sr_tag)
-        if sr_ref.nil? or sr_ref.empty? 
-          puts "Couldn't locate SR tagged: #{sr_tag} skipping #{vm_tag} backups"
+        sr_refs = find_sr_by_tag(sr_tag)
+        if sr_refs.nil? or sr_refs.empty? 
+          puts "WARN: Couldn't locate SR tagged: #{sr_tag} skipping #{vm_tag} backups"
           next
         end
-      
+
         seppartor "Snapshotting all VM's with tag: '#{vm_tag}'" 
         snap_refs  = snapshot_vms(vms)
 
         seppartor "Moving Snapshots to Backup volume tagged '#{sr_tag}'"
-        move_vms(snap_refs, sr_ref)
+        move_vms(snap_refs, sr_refs)
 
         seppartor "Cleaning Up snapshots."
         snap_refs.each do |tuple|
@@ -66,21 +65,16 @@ module XenBackup
     end
 
     # move vms to sr(s)
-    def move_vms(refs, sr_ref)
+    def move_vms(refs, sr_refs)
       # TODO: this should prob be lifted
-      if sr_ref.respond_to? :keys
-        sr_refs = sr_ref.keys
-      elsif sr_ref.kind_of? Array
-        sr_refs = sr_ref
-      else
-        sr_refs = [sr_ref]
-      end
-        
       refs.each do |tuple|
         ref, name = tuple
         # get random ref
         sr_ref = sr_refs.sample
-        puts "Moving #{name} to Backup SR: #{sr_ref}"
+        sr_name = 'N/A'
+        sr_name = @srdata[sr_ref]['name_label']
+
+        puts "Moving #{name} to Backup SR: '#{sr_name}' : #{sr_ref}"
         task =xapi.Async.VM.copy(ref, name, sr_ref)
         wait_on_task task
       end
@@ -95,11 +89,11 @@ module XenBackup
     end
 
     def find_sr_by_tag(tag)
+      refs = []
       @srdata.each do |ref,sr|
-        if sr['tags'].include?(tag)
-          return ref
-        end
+        refs.push(ref) if sr['tags'].include?(tag)
       end 
+      refs
     end
 
     # filter_tags takes a list of tag filters to apply to the vmdata
