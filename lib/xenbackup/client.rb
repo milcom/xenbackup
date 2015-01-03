@@ -102,7 +102,9 @@ module XenBackup
       list = []
       @vmdata.each do |ref,vm|
         if filters.all? {|t| vm['tags'].include?(t)}
-          list.push([ref, vm['name_label']])
+          unless vm['is_a_snapshot'] == 'true'
+            list.push([ref, vm['name_label']])
+          end
         end
       end
       list
