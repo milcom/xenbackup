@@ -1,5 +1,4 @@
 module XenBackup
-
   class << self
     attr_accessor :configuration
   end
@@ -10,7 +9,7 @@ module XenBackup
   end
 
   class Configuration
-    attr_accessor :uri, :user, :pass, :backup, :tag, :ssl_validate
+    attr_accessor :uri, :user, :pass, :backup, :tag, :ssl_validate, :timeout
 
     # could set defaults here
     def initialize
@@ -18,6 +17,7 @@ module XenBackup
       @user = 'root'
       @tag = 'xenbackup'
       @ssl_validate = true
+      @timeout = 30
     end
   end
 end
