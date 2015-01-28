@@ -16,7 +16,7 @@ module XenBackup
       load_vmdata
       load_srdata
       # before we backup, build a list of last backups to prune
-      @cleanup = filter_vm_tags([XenBackup.configuration.tag])
+      @cleanup = filter_template_tags([XenBackup.configuration.tag])
     end
 
     # clean up old backups
@@ -102,6 +102,7 @@ module XenBackup
 
     # filter_tags takes a list of tag filters to apply to the vmdata
     # returns a hash of ref: label
+    #  TODO: make this more generic to handle template/snap tags optionally
     def filter_vm_tags(filters = [])
       list = []
       @vmdata.each do |ref, vm|
@@ -112,6 +113,19 @@ module XenBackup
         end
       end
       list
+    end
+
+    # filter templates by tags
+    # returns a hash of ref: label
+    def filter_template_tags(filters = [])
+      list = []
+      @vmdata.each do |ref, vm|
+        if filters.all? { |t| vm['tags'].include?(t) }
+          if vm['is_a_template'] == true
+            list.push([ref, vm['name_label']])
+          end
+        end
+      end
     end
 
     # poweroff and clean the the vm and associated objects
