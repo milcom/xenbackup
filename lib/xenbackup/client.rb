@@ -22,8 +22,8 @@ module XenBackup
     # clean up old backups
     def clean_backups
       puts 'Cleaning up Old backups'
-      @cleanup.each do |data|
-        ref, name = data
+      @cleanup.each do |tuple|
+        ref, name = tuple
         cleanup_vm(ref, name)
       end
     end
@@ -126,6 +126,7 @@ module XenBackup
           end
         end
       end
+      list
     end
 
     # poweroff and clean the the vm and associated objects
